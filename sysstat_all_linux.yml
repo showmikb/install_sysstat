@@ -1,0 +1,34 @@
+---
+- name: Install and start sysstat with custom configuration
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Determine the OS type and version
+      set_fact:
+        os_name: "{{ ansible_os_family }}"
+
+    - name: Install sysstat
+      when: os_name == 'RedHat'
+      package:
+        name: sysstat
+        state: present
+
+      when: os_name == 'Debian'
+      package:
+        name: sysstat
+        state: present
+
+    - name: Copy sysstat configuration file
+      copy:
+        src: sysstat.conf
+        dest: /etc/sysconfig/sysstat
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Enable and start sysstat service
+      service:
+        name: sysstat
+        enabled: yes
+        state: started
